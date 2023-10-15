@@ -1,0 +1,72 @@
+body {
+  padding-top: 50px; /* Increased top padding for better spacing */
+  padding-bottom: 40px;
+  background-color: #f8f8f8; /* Light gray background */
+  margin-top: 100px;
+}
+
+.form-signin {
+  max-width: 400px; /* Increased maximum width for better form alignment */
+  padding: 30px; /* Increased padding for better spacing */
+  margin: 0 auto;
+  background-color: #fff; /* White background */
+  border: 1px solid #dcdcdc; /* Subtle border */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Subtle box shadow */
+}
+
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+  margin-bottom: 20px; /* Increased spacing for better readability */
+  text-align: center; /* Center-align text */
+}
+
+.form-signin .checkbox {
+  font-weight: normal;
+}
+
+.form-signin .form-control {
+  position: relative;
+  height: auto;
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  padding: 15px; /* Increased padding for better input field size */
+  font-size: 16px;
+  margin-bottom: 15px; /* Increased margin for better spacing */
+}
+
+.form-signin .form-control:focus {
+  z-index: 2;
+  box-shadow: none; /* Removed focus box-shadow for cleaner appearance */
+}
+
+.form-signin input[type="email"],
+.form-signin input[type="password"] {
+  border: 1px solid #dcdcdc; /* Subtle border */
+  border-radius: 4px; /* Rounded corners */
+}
+
+.form-signin input[type="email"] {
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+
+.form-signin input[type="password"] {
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+.form-signin button {
+  background-color: #0077b6; /* Professional blue button */
+  color: #fff; /* White text */
+  border: none; /* Removed border */
+  border-radius: 4px; /* Rounded corners */
+  padding: 10px 20px; /* Increased padding for better button size */
+  font-size: 16px;
+  cursor: pointer; /* Pointer cursor on hover */
+}
+
+.form-signin button:hover {
+  background-color: #005b8a; /* Darker blue on hover */
+}
