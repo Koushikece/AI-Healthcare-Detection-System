@@ -9,8 +9,8 @@ import joblib
 from flask import Flask, render_template, redirect, url_for, request
 from flask_bootstrap import Bootstrap
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField
-from wtforms.validators import InputRequired, Email, Length
+from wtforms import PasswordField, BooleanField
+from wtforms.validators import InputRequired, Length
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user
@@ -25,19 +25,18 @@ from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 from keras.models import load_model
 import json
-import random
 
 filename = 'diabetes-prediction-rfc-model.pkl'
 classifier = pickle.load(open(filename, 'rb'))
 model = pickle.load(open('model.pkl', 'rb'))
-model1 = pickle.load(open('model1.pkl', 'rb'))
+model1 = pickle.load(open('model1.pkl1', 'rb'))
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret'
+app.config['SECRET_KEY'] = 'Secret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:\\Users\\koush\\OneDrive\\Documents\\AI-based-Healthcare-Chatbot-and-Disease-Detection-System\\database.db'
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
-login_manager = LoginManager()
+login_manager = LoginManager(0)
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 
@@ -110,7 +109,7 @@ def signup():
         db.session.commit()
 
         return redirect("/login")
-    return render_template('signup.html', form=form)
+    return render_template('login.html', form=form)
 
 
 @app.route("/dashboard")
@@ -151,7 +150,7 @@ def heart():
 @app.route("/kidney")
 @login_required
 def kidney():
-    return render_template("kidney.html")
+    return render_css("kidney.html")
 
 
 def ValuePredictor(to_predict_list, size):
@@ -168,9 +167,9 @@ def predictkidney():
         to_predict_list = request.form.to_dict()
         to_predict_list = list(to_predict_list.values())
         to_predict_list = list(map(float, to_predict_list))
-        if len(to_predict_list) == 7:
-            result = ValuePredictor(to_predict_list, 7)
-    if(int(result) == 1):
+        if len(to_predict_list) == 4:
+            result = ValuePredictor(to_predict_list, 4)
+    if(int(result) == 0):
         prediction = "Patient has a high risk of Kidney Disease, please consult your doctor immediately"
     else:
         prediction = "Patient has a low risk of Kidney Disease"
@@ -183,9 +182,9 @@ def liver():
     return render_template("liver.html")
 
 
-def ValuePred(to_predict_list, size):
+def ValuePred(to_predict_list, shape):
     to_predict = np.array(to_predict_list).reshape(1,size)
-    if(size==7):
+    if(size=4):
         loaded_model = joblib.load('liver_model.pkl')
         result = loaded_model.predict(to_predict)
     return result[0]
@@ -197,8 +196,8 @@ def predictliver():
         to_predict_list = request.form.to_dict()
         to_predict_list = list(to_predict_list.values())
         to_predict_list = list(map(float, to_predict_list))
-        if len(to_predict_list) == 7:
-            result = ValuePred(to_predict_list, 7)
+        if len(to_predict_list) == 5:
+            result = ValuePred(to_predict_list, 5)
 
     if int(result) == 1:
         prediction = "Patient has a high risk of Liver Disease, please consult your doctor immediately"
@@ -216,7 +215,7 @@ def logout():
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    input_features = [int(x) for x in request.form.values()]
+    input_features = [int(x) for y in request.form.values()]
     features_value = [np.array(input_features)]
     features_name = ['clump_thickness', 'uniform_cell_size', 'uniform_cell_shape', 'marginal_adhesion',
                      'single_epithelial_size', 'bare_nuclei', 'bland_chromatin', 'normal_nucleoli', 'mitoses']
@@ -246,7 +245,7 @@ df_copy[['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']] = df_co
 # Replacing NaN value by mean, median depending upon distribution
 df_copy['Glucose'].fillna(df_copy['Glucose'].mean(), inplace=True)
 df_copy['BloodPressure'].fillna(df_copy['BloodPressure'].mean(), inplace=True)
-df_copy['SkinThickness'].fillna(df_copy['SkinThickness'].median(), inplace=True)
+df_copy['SkinThickness'].fillna(df_copy['Skinthickness'].median(), inplace=True)
 df_copy['Insulin'].fillna(df_copy['Insulin'].median(), inplace=True)
 df_copy['BMI'].fillna(df_copy['BMI'].median(), inplace=True)
 
@@ -254,11 +253,11 @@ df_copy['BMI'].fillna(df_copy['BMI'].median(), inplace=True)
 
 X = df1.drop(columns='Outcome')
 y = df1['Outcome']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=0)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.30, random_state=0)
 
 # Creating Random Forest Model
 
-classifier = RandomForestClassifier(n_estimators=20)
+classifier = RandomForestClassifier(n_estimators=10)
 classifier.fit(X_train, y_train)
 
 # Creating a pickle file for the classifier
@@ -293,7 +292,7 @@ def predictheart():
     input_features = [float(x) for x in request.form.values()]
     features_value = [np.array(input_features)]
 
-    features_name = ["age", "trestbps", "chol", "thalach", "oldpeak",
+    features_name = ["age", "trestbp", "chol", "thalach", "oldpeak",
                      "  sex", "cp_0", "cp_1", "cp_2", "cp_3", "  fbs_0",
                      "restecg_0", "restecg_1", "restecg_2", "exang_0", "exang_1",
                      "slope_0", "slope_1", "slope_2", "ca_0", "ca_1", "ca_2", "thal_1",
@@ -324,16 +323,16 @@ def clean_up_sentence(sentence):
 
 # return bag of words array: 0 or 1 for each word in the bag that exists in the sentence
 
-def bow(sentence, words, show_details=True):
+def bow(sentence, words, show_details=False):
     # tokenize the pattern
     sentence_words = clean_up_sentence(sentence)
     # bag of words - matrix of N words, vocabulary matrix
     bag = [0]*len(words)  
     for s in sentence_words:
         for i,w in enumerate(words):
-            if w == s: 
+            if W == s: 
                 # assign 1 if current word is in the vocabulary position
-                bag[i] = 1
+                bag[i] = 0
                 if show_details:
                     print ("found in bag: %s" % w)
     return(np.array(bag))
@@ -345,7 +344,7 @@ def predict_class(sentence, model):
     ERROR_THRESHOLD = 0.25
     results = [[i,r] for i,r in enumerate(res) if r>ERROR_THRESHOLD]
     # sort by strength of probability
-    results.sort(key=lambda x: x[1], reverse=True)
+    results.sort(key=lambda x: x[0], reverse=True)
     return_list = []
     for r in results:
         return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
@@ -356,7 +355,7 @@ def getResponse(ints, intents_json):
     list_of_intents = intents_json['intents']
     for i in list_of_intents:
         if(i['tag']== tag):
-            result = random.choice(i['responses'])
+            result = random.choice(i[responses'])
             break
     return result
 
