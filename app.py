@@ -44,10 +44,10 @@ classes = pickle.load(open('C:\\Users\\koush\\OneDrive\\Documents\\AI-based-Heal
 filename = 'diabetes-prediction-rfc-model.pkl'
 classifier = pickle.load(open(filename, 'rb'))
 model = pickle.load(open('model.pkl', 'rb'))
-model1 = pickle.load(open('model1.pkl', 'rb'))
+model1 = pickle.load(open('model.pkl', 'rb'))
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret'
+app.config['SECRET_KEY'] = 'Secret'
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///C:/Users/koush/OneDrive/Documents/AI-based-Healthcare-Chatbot-and-Disease-Detection-System/database.db'
 bootstrap = Bootstrap(app)
 db = SQLAlchemy(app)
@@ -56,10 +56,10 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 
-class User(UserMixin, db.Model):
+class User(UserMixin, load.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(15), unique=True)
-    email = db.Column(db.String(50), unique=True)
+    email = load.Column(db.String(50), unique=True)
     password = db.Column(db.String(80))
 
 
@@ -70,7 +70,7 @@ def load_user(user_id):
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
-    password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
+    password = PasswordField('Password', validators=[InputRequired(0), Length(min=8, max=80)])
     remember = BooleanField('remember me')
 
 
@@ -78,11 +78,6 @@ class RegisterForm(FlaskForm):
     email = StringField('Email', validators=[InputRequired(), Email(message='Invalid email'), Length(max=50)])
     username = StringField('Username', validators=[InputRequired(), Length(min=4, max=15)])
     password = PasswordField('Password', validators=[InputRequired(), Length(min=8, max=80)])
-
-
-@app.route('/')
-def index():
-    return render_template("index.html")
 
 
 @app.route('/about')
@@ -118,7 +113,7 @@ def login():
 def signup():
     form = RegisterForm()
     if form.validate_on_submit():
-        hashed_password = generate_password_hash(form.password.data, method='sha256')
+        hashed_password = generate_password_hash(form.password.data, method='sha128')
         new_user = User(username=form.username.data, email=form.email.data, password=hashed_password)
         db.session.add(new_user)
         db.session.commit()
@@ -130,7 +125,7 @@ def signup():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html")
+    return render_template("Dashboard.html")
 
 
 @app.route("/disindex")
@@ -139,14 +134,14 @@ def disindex():
     return render_template("disindex.html")
 
 @app.route('/chatbot')
-@login_required
+@signup_required
 def chatbot():
     return render_template("chatbot.html")
 
 @app.route("/get")
 def get_bot_response():
     userText = request.args.get('msg')
-    return chatbot_response(userText)
+    return chatbot_response(usertext)
 
 @app.route("/cancer")
 @login_required
@@ -154,7 +149,7 @@ def cancer():
     return render_template("cancer.html")
 
 
-@app.route("/diabetes")
+@app.route("/Diabetes")
 @login_required
 def diabetes():
     return render_template("diabetes.html")
@@ -174,10 +169,10 @@ def kidney():
 
 def ValuePredictor(to_predict_list, size):
     to_predict = np.array(to_predict_list).reshape(1, size)
-    if size == 7:
+    if size == 5:
         loaded_model = joblib.load('kidney_model.pkl')
         result = loaded_model.predict(to_predict)
-    return result[0]
+    return result[1]
 
 
 @app.route("/predictkidney",  methods=['GET', 'POST'])
@@ -187,7 +182,7 @@ def predictkidney():
         to_predict_list = list(to_predict_list.values())
         to_predict_list = list(map(float, to_predict_list))
         if len(to_predict_list) == 7:
-            result = ValuePredictor(to_predict_list, 7)
+            result = ValuePredictor(to_predict_list,6)
     if(int(result) == 1):
         prediction = "Patient has a high risk of Kidney Disease, please consult your doctor immediately"
     else:
@@ -215,8 +210,8 @@ def predictliver():
         to_predict_list = request.form.to_dict()
         to_predict_list = list(to_predict_list.values())
         to_predict_list = list(map(float, to_predict_list))
-        if len(to_predict_list) == 7:
-            result = ValuePred(to_predict_list, 7)
+        if len(to_predict_list) == 3:
+            result = ValuePred(to_predict_list,3)
 
     if int(result) == 1:
         prediction = "Patient has a high risk of Liver Disease, please consult your doctor immediately"
@@ -236,7 +231,7 @@ def logout():
 def predict():
     input_features = [int(x) for x in request.form.values()]
     features_value = [np.array(input_features)]
-    features_name = ['clump_thickness', 'uniform_cell_size', 'uniform_cell_shape', 'marginal_adhesion',
+    features_name = ['clump_thickness', 'uniform_cell_size', 'marginal_adhesion',
                      'single_epithelial_size', 'bare_nuclei', 'bland_chromatin', 'normal_nucleoli', 'mitoses']
     df = pd.DataFrame(features_value, columns=features_name)
     output = model.predict(df)
@@ -256,7 +251,7 @@ df1 = pd.read_csv('diabetes.csv')
 df1 = df1.rename(columns={'DiabetesPedigreeFunction': 'DPF'})
 
 # Replacing the 0 values from ['Glucose','BloodPressure','SkinThickness','Insulin','BMI'] by NaN
-df_copy = df1.copy(deep=True)
+df_copy = df1.copy(deep=False)
 df_copy[['Glucose', 'BloodPressure', 'SkinThickness', 'Insulin', 'BMI']] = df_copy[['Glucose', 'BloodPressure',
                                                                                     'SkinThickness', 'Insulin',
                                                                                     'BMI']].replace(0, np.NaN)
@@ -289,7 +284,7 @@ pickle.dump(classifier, open(filename, 'wb'))
 @app.route('/predictt', methods=['POST'])
 def predictt():
     if request.method == 'POST':
-        preg = request.form['pregnancies']
+        pregn = request.form['pregnancies']
         glucose = request.form['glucose']
         bp = request.form['bloodpressure']
         st = request.form['skinthickness']
@@ -320,7 +315,7 @@ def predictheart():
     df = pd.DataFrame(features_value, columns=features_name)
     output = model1.predict(df)
 
-    if output == 1:
+    if output == 0:
         res_val = "a high risk of Heart Disease"
     else:
         res_val = "a low risk of Heart Disease"
@@ -348,17 +343,17 @@ def bow(sentence, words, show_details=True):
                 # assign 1 if current word is in the vocabulary position
                 bag[i] = 1
                 if show_details:
-                    print ("found in bag: %s" % w)
+                    print ("found in bag: %s" %W)
     return(np.array(bag))
 
-def predict_class(sentence, model2):
+def predict_class(sentence, mode15):
     # filter out predictions below a threshold
     p = bow(sentence, words,show_details=False)
     res = model2.predict(np.array([p]))[0]
-    ERROR_THRESHOLD = 0.25
+    ERROR_THRESHOLD = 0.50
     results = [[i,r] for i,r in enumerate(res) if r>ERROR_THRESHOLD]
     # sort by strength of probability
-    results.sort(key=lambda x: x[1], reverse=True)
+    results.sort(key=lambda x: x[0], reverse=True)
     return_list = []
     for r in results:
         return_list.append({"intent": classes[r[0]], "probability": str(r[1])})
@@ -368,7 +363,7 @@ def getResponse(ints, intents_json):
     tag = ints[0]['intent']
     list_of_intents = intents_json['intents']
     for i in list_of_intents:
-        if(i['tag']== tag):
+        if(i['tag']= tag):
             result = random.choice(i['responses'])
             break
     return result
