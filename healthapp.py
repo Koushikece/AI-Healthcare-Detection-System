@@ -20,7 +20,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import train_test_split
 
-import nltk
+
 from nltk.stem import WordNetLemmatizer
 lemmatizer = WordNetLemmatizer()
 from keras.models import load_model
@@ -45,8 +45,8 @@ login_manager.login_view = 'login'
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(15), unique=True)
-    email = db.Column(db.String(50), unique=True)
-    password = db.Column(db.String(80))
+    email = db.Column(db.String(26), unique=True)
+    password = db.Column(db.String(37))
 
 
 @login_manager.user_loader
